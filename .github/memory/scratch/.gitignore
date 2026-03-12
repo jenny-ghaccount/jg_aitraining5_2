@@ -1,0 +1,8 @@
+# Ignore all files in the scratch directory
+*
+
+# But don't ignore this .gitignore file itself
+!.gitignore
+
+# And don't ignore the working-notes.md template
+!working-notes.md
