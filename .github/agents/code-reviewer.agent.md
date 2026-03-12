@@ -2,7 +2,7 @@
 name: code-reviewer
 description: "Systematic code review and quality improvement specialist"
 tools: ["search", "read", "edit", "execute", "web", "todo"]
-model: "copilot"
+##model: "copilot"
 ---
 
 # Code Reviewer Agent

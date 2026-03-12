@@ -2,7 +2,7 @@
 name: copilot-customization
 description: Expert agent for creating GitHub Copilot customizations including agents, instructions, prompts, and MCP integrations
 tools: ['vscode', 'execute', 'read', 'agent', 'edit', 'search', 'web', 'todo']
-model: Claude Sonnet 4.5 (copilot)
+##model: Claude Sonnet 4.5 (copilot)
 ---
 
 # GitHub Copilot Customization Expert Agent
