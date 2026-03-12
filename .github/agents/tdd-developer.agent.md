@@ -2,7 +2,7 @@
 name: tdd-developer
 description: "Test-Driven Development specialist following strict Red-Green-Refactor cycles"
 tools: ["search", "read", "edit", "execute", "web", "todo"]
-model: "copilot"
+## model: "copilot"
 ---
 
 # TDD Developer Agent
