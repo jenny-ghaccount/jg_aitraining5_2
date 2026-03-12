@@ -24,16 +24,20 @@ import {
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import './App.css';
 
-// INTENTIONAL ISSUE: API_URL should use environment variable or relative URL
-const API_URL = 'http://localhost:3001/api/todos';
+// INTENTIONAL ISSUE: API_URL should use environment variable or relative URL - NOW FIXED
+// Using relative URL with proxy configured in package.json
+const API_URL = '/api/todos';
 
 // React Query hook for fetching todos
 const useTodos = () => {
   return useQuery({
     queryKey: ['todos'],
-    // INTENTIONAL ISSUE: Missing error handling in query
+    // INTENTIONAL ISSUE: Missing error handling in query - NOW FIXED
     queryFn: async () => {
       const response = await fetch(API_URL);
+      if (!response.ok) {
+        throw new Error('Failed to fetch todos');
+      }
       const data = await response.json();
       return data;
     },
@@ -45,7 +49,7 @@ function App() {
   const queryClient = useQueryClient();
 
   // Fetch todos using React Query
-  const { data: todos = [], isLoading } = useTodos();
+  const { data: todos = [], isLoading, error, isError } = useTodos();
 
   // Mutation for adding a new todo
   const addTodoMutation = useMutation({
@@ -76,12 +80,10 @@ function App() {
     },
   });
 
-  // INTENTIONAL ISSUE: Delete mutation not implemented
+  // INTENTIONAL ISSUE: Delete mutation not implemented - NOW FIXED
   const deleteTodoMutation = useMutation({
     mutationFn: async (id) => {
-      // TODO: Implement delete functionality
-      console.log('Delete todo:', id);
-      // Missing: await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
+      await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['todos'] });
@@ -105,6 +107,10 @@ function App() {
 
   // INTENTIONAL ISSUE: Edit functionality not implemented
   // const handleEditTodo = (id, newTitle) => { ... }
+
+  // Calculate stats from todos
+  const incompleteTodos = todos.filter(todo => !todo.completed).length;
+  const completedTodos = todos.filter(todo => todo.completed).length;
 
   return (
     <Box
@@ -160,16 +166,49 @@ function App() {
           </CardContent>
         </Card>
 
+        {/* Error state */}
+        {isError && (
+          <Card sx={{ mb: 3, bgcolor: 'error.light' }}>
+            <CardContent>
+              <Box sx={{ textAlign: 'center', py: 2 }}>
+                <Typography variant="h6" color="error.dark" gutterBottom>
+                  Error loading todos
+                </Typography>
+                <Typography variant="body2" color="error.dark">
+                  {error?.message || 'Something went wrong. Please try again later.'}
+                </Typography>
+              </Box>
+            </CardContent>
+          </Card>
+        )}
+
         {isLoading && (
           <Box sx={{ display: 'flex', justifyContent: 'center', my: 4 }}>
             <CircularProgress />
           </Box>
         )}
 
-        {/* INTENTIONAL ISSUE: No empty state message when todos.length === 0 */}
+        {/* Empty state message when no todos exist */}
+        {!isLoading && todos.length === 0 && (
+          <Card>
+            <CardContent>
+              <Box sx={{ textAlign: 'center', py: 4 }}>
+                <Typography variant="h6" color="text.secondary" gutterBottom>
+                  No todos yet!
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  Add your first todo above to get started.
+                </Typography>
+              </Box>
+            </CardContent>
+          </Card>
+        )}
 
-        <Card>
-          <List sx={{ p: 0 }}>
+        {/* INTENTIONAL ISSUE: No empty state message when todos.length === 0 - NOW FIXED */}
+
+        {!isLoading && todos.length > 0 && (
+          <Card>
+            <List sx={{ p: 0 }}>
             {todos.map((todo, index) => (
               <ListItem
                 key={todo.id}
@@ -199,7 +238,7 @@ function App() {
                   <IconButton
                     size="small"
                     color="primary"
-                    onClick={() => console.log('Edit not implemented')}
+                    onClick={() => {}}
                   >
                     <EditIcon />
                   </IconButton>
@@ -215,11 +254,12 @@ function App() {
             ))}
           </List>
         </Card>
+        )}
 
-        {/* INTENTIONAL ISSUE: Stats always show 0 instead of calculating from todos */}
+        {/* INTENTIONAL ISSUE: Stats always show 0 instead of calculating from todos - NOW FIXED */}
         <Box sx={{ mt: 3, display: 'flex', justifyContent: 'center', gap: 2 }}>
-          <Chip label={`${0} items left`} color="primary" />
-          <Chip label={`${0} completed`} color="success" />
+          <Chip label={`${incompleteTodos} items left`} color="primary" />
+          <Chip label={`${completedTodos} completed`} color="success" />
         </Box>
       </Container>
     </Box>
